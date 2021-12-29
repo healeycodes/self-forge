@@ -2,7 +2,7 @@
 
 One day, I'd like to write a lightweight clone of GitHub.
 
-For now, here's < 100 lines of Go that host your source files.
+For now, here's ~100 lines of Go that host your source files.
 
 - Clones all of a GitHub user's repositories
 - Serves the default branch of each via `http.FileServer`
