@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -104,7 +103,7 @@ func serve() {
 		log.Fatal("PORT not set")
 	}
 
-	fmt.Printf("Serving on http://localhost%s\n", port)
+	log.Printf("Serving on http://localhost%s\n", port)
 	if err := http.ListenAndServe(port, nil); err != nil {
 		log.Fatal(err)
 	}
