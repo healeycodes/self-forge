@@ -6,12 +6,24 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"sync"
+	"path"
 	"time"
 
 	"github.com/go-git/go-git/v5"
 )
 
+// TODOs
+
+// - paginate GH API to get _all_ repos
+
+// (not sure best order for the following:)
+// - serve tree
+// - serve branches
+// - serve code files
+
+// - syntax highlighting (maybe?)
+
+const updateFrequency = 15 // seconds
 const repoPath = "./repositories/"
 
 func main() {
@@ -19,19 +31,28 @@ func main() {
 		log.Fatal(err)
 	}
 
-	repos, err := getRepos()
+	err := updateRepos()
 	if err != nil {
-		log.Fatal(err)
+		log.Printf("error: %s\n", err)
 	}
 
-	err = cloneRepos(repos)
-	if err != nil {
-		log.Fatal(err)
-	}
+	ticker := time.NewTicker(updateFrequency * time.Second)
+	go func() {
+		for {
+			select {
+			case <-ticker.C:
+				err = updateRepos()
+				if err != nil {
+					log.Printf("error: %s\n", err)
+				}
+			}
+		}
+	}()
+
 	serve()
 }
 
-func getRepos() (repos, error) {
+func getGitHubInfo() (repos, error) {
 	username, found := os.LookupEnv("GITHUB_USERNAME")
 	if !found {
 		log.Fatal("GITHUB_USERNAME not set")
@@ -63,37 +84,73 @@ func getRepos() (repos, error) {
 	return repos, nil
 }
 
-func cloneRepos(repos repos) error {
-	start := time.Now()
-	var wg sync.WaitGroup
-	for _, repo := range repos {
-		wg.Add(1)
-		name := repo.Name
-		gitUrl := repo.GitUrl
-		go func() {
-			defer wg.Done()
-			cloneRepo(name, gitUrl)
-		}()
-	}
-	wg.Wait()
-	elapsed := time.Since(start)
-	log.Printf("all clones done in %s", elapsed)
-
-	return nil
-}
-
-func cloneRepo(name string, gitUrl string) {
-	start := time.Now()
-	log.Println("cloning: " + gitUrl)
+func cloneRepo(name string, gitUrl string) error {
 	_, err := git.PlainClone(repoPath+name, false, &git.CloneOptions{
 		URL:      gitUrl,
 		Progress: log.Writer(),
 	})
 	if err != nil {
-		log.Println(err)
+		return err
 	}
-	elapsed := time.Since(start)
-	log.Printf("%s took %s", name, elapsed)
+	return nil
+}
+
+func updateRepos() error {
+	githubRepos, err := getGitHubInfo()
+	if err != nil {
+		return err
+	}
+
+	files, err := os.ReadDir(repoPath)
+	if err != nil {
+		return err
+	}
+	directories := make(map[string]bool)
+	for _, file := range files {
+		if file.IsDir() {
+			directories[file.Name()] = true
+		}
+	}
+
+	for _, repo := range githubRepos {
+		if _, ok := directories[repo.Name]; !ok {
+			log.Printf("cloning: %s\n", repo.GitUrl)
+			err := cloneRepo(repo.Name, repo.GitUrl)
+			if err != nil {
+				return err
+			}
+		} else {
+			localGitPath := path.Join(repoPath, repo.Name)
+			log.Printf("opening: %s\n", localGitPath)
+			r, err := git.PlainOpen(localGitPath)
+			if err != nil {
+				return err
+			}
+
+			log.Printf("fetching: %s\n", localGitPath)
+			err = r.Fetch(&git.FetchOptions{Force: true})
+			if err != nil {
+				if err != git.NoErrAlreadyUpToDate {
+					return err
+				}
+			}
+
+			log.Printf("getting worktree: %s\n", localGitPath)
+			w, err := r.Worktree()
+			if err != nil {
+				return err
+			}
+
+			log.Printf("pulling: %s\n", localGitPath)
+			err = w.Pull(&git.PullOptions{Force: true})
+			if err != nil {
+				if err != git.NoErrAlreadyUpToDate {
+					return err
+				}
+			}
+		}
+	}
+	return nil
 }
 
 func serve() {
