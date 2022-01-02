@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -79,7 +78,9 @@ func handleHome(w http.ResponseWriter, r *http.Request) {
 	for dir := range directories {
 		list = append(list, dir)
 	}
-	json.NewEncoder(w).Encode(list)
+
+	username, _ := os.LookupEnv("GITHUB_USERNAME")
+	w.Write([]byte(renderHome(username, list)))
 }
 
 func handleRepository(w http.ResponseWriter, r *http.Request) {

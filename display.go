@@ -9,8 +9,28 @@ import (
 	"github.com/go-git/go-git/v5/plumbing/object"
 )
 
+func renderHome(username string, repositories []string) string {
+	ret := fmt.Sprintf(`<html>
+		<h4>
+			<a href="/">home</a>
+		</h4>
+		<p>Git mirror of %s</p>
+		<details open>
+			<summary>Projects</summary>
+			<ul>`, html.EscapeString(username))
+
+	for _, repository := range repositories {
+		ret += fmt.Sprintf(`<li><a href="/%s/tree/">%s</a></li>`, repository, repository)
+	}
+
+	return ret + "</details>"
+}
+
 func renderContext(repository string, filePath string, branchShort string, branchList []string, fileList []gitFile, commitList []gitCommit) string {
-	ret := fmt.Sprintf("<html><h4><a href=\"/\">home</a> -> <a href=\"/%s/tree/?branch=%s\">%s</a> (%s)</h4>", repository, branchShort, repository, branchShort)
+	ret := fmt.Sprintf(`<html>
+		<h4>
+			<a href="/">home</a> -> <a href="/%s/tree/?branch=%s">%s</a> (%s)
+		</h4>`, repository, branchShort, repository, branchShort)
 
 	// Branches
 	ret += `<details>
