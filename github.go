@@ -72,45 +72,53 @@ func updateRepos() error {
 
 	for _, repo := range githubRepos {
 		lockRepo(repo.Name)
-		defer unlockRepo(repo.Name)
 
-		if _, ok := directories[repo.Name]; !ok {
-			log.Printf("cloning: %s\n", repo.GitUrl)
-			err := cloneRepo(repo.Name, repo.GitUrl)
-			if err != nil {
-				return err
-			}
-		} else {
-			localGitPath := path.Join(repoPath, repo.Name)
-			log.Printf("opening: %s\n", localGitPath)
-			r, err := git.PlainOpen(localGitPath)
-			if err != nil {
-				return err
-			}
+		err = func() error {
+			defer unlockRepo(repo.Name)
 
-			log.Printf("fetching: %s\n", localGitPath)
-			err = r.Fetch(&git.FetchOptions{Force: true})
-			if err != nil {
-				if err != git.NoErrAlreadyUpToDate {
+			if _, ok := directories[repo.Name]; !ok {
+				log.Printf("cloning: %s\n", repo.GitUrl)
+				err := cloneRepo(repo.Name, repo.GitUrl)
+				if err != nil {
 					return err
+				}
+			} else {
+				localGitPath := path.Join(repoPath, repo.Name)
+				log.Printf("opening: %s\n", localGitPath)
+				r, err := git.PlainOpen(localGitPath)
+				if err != nil {
+					return err
+				}
+
+				log.Printf("fetching: %s\n", localGitPath)
+				err = r.Fetch(&git.FetchOptions{Force: true})
+				if err != nil {
+					if err != git.NoErrAlreadyUpToDate {
+						return err
+					}
+				}
+
+				log.Printf("getting worktree: %s\n", localGitPath)
+				w, err := r.Worktree()
+				if err != nil {
+					return err
+				}
+
+				log.Printf("pulling: %s\n", localGitPath)
+				err = w.Pull(&git.PullOptions{Force: true})
+				if err != nil {
+					if err != git.NoErrAlreadyUpToDate {
+						return err
+					}
 				}
 			}
 
-			log.Printf("getting worktree: %s\n", localGitPath)
-			w, err := r.Worktree()
-			if err != nil {
-				return err
-			}
+			return nil
+		}()
 
-			log.Printf("pulling: %s\n", localGitPath)
-			err = w.Pull(&git.PullOptions{Force: true})
-			if err != nil {
-				if err != git.NoErrAlreadyUpToDate {
-					return err
-				}
-			}
+		if err != nil {
+			return err
 		}
-		unlockRepo(repo.Name)
 	}
 	return nil
 }

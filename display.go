@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"html"
-	"path"
 
 	"github.com/go-git/go-git/v5/plumbing/object"
 )
@@ -40,7 +39,7 @@ func renderContext(repository string, filePath string, branchShort string, branc
 		if otherBranchShort == branchShort {
 			ret += fmt.Sprintf("<li>%s</li>", branchShort)
 		} else {
-			ret += fmt.Sprintf("<li><a href=\"/%s/tree/\">%s</a></li>", path.Join(repository, filePath), otherBranchShort)
+			ret += fmt.Sprintf("<li><a href=\"/%s/tree/\">%s</a></li>", repository, otherBranchShort)
 		}
 	}
 	ret += "</ul></details>"
