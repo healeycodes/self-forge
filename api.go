@@ -103,7 +103,7 @@ func getContext(repoName string, extra string) ([]string, []gitFile, []gitCommit
 	return branchList, fileList, commitList, nil
 }
 
-// Get branch from short name (or get default branch if branchShort is "")
+// Get branch from short name (empty `branchShort` returns default branch)
 func getBranchRefFromShort(repoName string, branchShort string) (plumbing.Hash, string, error) {
 	localGitPath := path.Join(repoPath, repoName)
 	r, err := git.PlainOpen(localGitPath)
@@ -149,7 +149,8 @@ func getBranchRefFromShort(repoName string, branchShort string) (plumbing.Hash, 
 	return refHash, branchShort, nil
 }
 
-// Checkout a branch, return the branch short name
+// Checkout a branch (empty `branchShort` uses default branch)
+// and return the branch short name
 func checkoutBranch(repoName string, branchShort string) (string, error) {
 	localGitPath := path.Join(repoPath, repoName)
 	r, err := git.PlainOpen(localGitPath)

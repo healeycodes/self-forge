@@ -94,7 +94,7 @@ func handleRepository(w http.ResponseWriter, r *http.Request) {
 	lockRepo(repository)
 	defer unlockRepo(repository)
 
-	currentBranchShort, err := checkoutBranch(repository, branch)
+	branchShort, err := checkoutBranch(repository, branch)
 	if err != nil {
 		handleError(w, err)
 		return
@@ -107,7 +107,7 @@ func handleRepository(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		w.Write([]byte(renderContext(repository, filePath, currentBranchShort, branchList, fileList, commitList)))
+		w.Write([]byte(renderContext(repository, filePath, branchShort, branchList, fileList, commitList)))
 	} else {
 		http.ServeFile(w, r, path.Join(repoPath, repository, filePath))
 	}
