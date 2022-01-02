@@ -59,6 +59,7 @@ func cloneRepo(repoName string, gitUrl string) error {
 }
 
 func updateRepos() error {
+	log.Println("updating repositories")
 	githubRepos, err := getGitHubInfo()
 	if err != nil {
 		return err

@@ -8,12 +8,13 @@ import (
 	"path"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/go-git/go-git/v5/plumbing"
 	"github.com/gorilla/mux"
 )
 
-const updateFrequency = 300 // seconds
+const updateFrequencySec = 3600
 const repoPath = "./repositories/"
 
 var repoMutexes map[string]*sync.Mutex
@@ -24,21 +25,21 @@ func main() {
 		log.Fatal(err)
 	}
 
-	// err := updateRepos()
-	// if err != nil {
-	// 	log.Printf("error: %s\n", err)
-	// }
+	err := updateRepos()
+	if err != nil {
+		log.Printf("error: %s\n", err)
+	}
 
-	// ticker := time.NewTicker(updateFrequency * time.Second)
-	// go func() {
-	// 	for {
-	// 		<-ticker.C
-	// 		err = updateRepos()
-	// 		if err != nil {
-	// 			log.Printf("error: %s\n", err)
-	// 		}
-	// 	}
-	// }()
+	ticker := time.NewTicker(updateFrequencySec * time.Second)
+	go func() {
+		for {
+			<-ticker.C
+			err = updateRepos()
+			if err != nil {
+				log.Printf("error: %s\n", err)
+			}
+		}
+	}()
 
 	serve()
 }
