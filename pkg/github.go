@@ -17,12 +17,12 @@ func getGitHubInfo() (gitHubRepos, error) {
 		log.Fatal("GITHUB_USERNAME not set")
 	}
 
-	perPage, found := os.LookupEnv("PER_PAGE")
+	limitRepos, found := os.LookupEnv("LIMIT_REPOS")
 	if !found {
-		perPage = "5"
+		limitRepos = "5"
 	}
 
-	url := "https://api.github.com/users/" + username + "/repos?per_page=" + perPage
+	url := "https://api.github.com/users/" + username + "/repos?per_page=" + limitRepos
 	resp, err := http.Get(url)
 	if err != nil {
 		return nil, err

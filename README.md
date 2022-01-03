@@ -1,16 +1,13 @@
 # self-forge
 
-One day, I'd like to write a lightweight clone of GitHub.
+_(Under construction)_
 
-For now, here's ~100 lines of Go that host your source files.
+Self-host your GitHub repositories and serve them with a lightweight user interface (no JS or CSS).
 
-- Clones all of a GitHub user's repositories
-- Serves the default branch of each via `http.FileServer`
-
-This is a good example use-case of `sync.WaitGroup` – all clones are run as concurrent goroutines.
+- `PORT` serve from 0.0.0.0:PORT
+- `LIMIT_REPOS` pull a limited amount of repositories
+- `GITHUB_USERNAME` use this account's public repositories
 
 ```bash
-PORT="80" GITHUB_USERNAME="healeycodes" go run serve.go
-# optionally use PER_PAGE to raise the number of repositories (up to 100)
-# TODO: pagination for unlimited repositories
+PORT="80" LIMIT_REPOS=5 GITHUB_USERNAME="healeycodes" go run .
 ```

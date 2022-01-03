@@ -20,7 +20,7 @@ var (
 	repoMutexes     map[string]*sync.Mutex
 )
 
-func main() {
+func start() {
 	repoMutexes = make(map[string]*sync.Mutex)
 
 	if err := os.Mkdir(repoPath, 0755); err != nil && !os.IsExist(err) {
