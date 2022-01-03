@@ -1,4 +1,4 @@
-package main
+package self_forge
 
 import (
 	"context"
@@ -22,7 +22,8 @@ func renderHome(username string, repositories []string) string {
 		ret += fmt.Sprintf(`<li><a href="/%s/tree/">%s</a></li>`, repository, repository)
 	}
 
-	return ret + "</details>"
+	return ret + `</details>
+	</html>`
 }
 
 func renderContext(repository string, filePath string, branchShort string, branchList []string, fileList []gitFile, commitList []gitCommit) string {
@@ -69,9 +70,10 @@ func renderContext(repository string, filePath string, branchShort string, branc
 		}
 		ret += text
 	}
-	ret += "</ul></details>"
 
-	return ret + "</html>"
+	return ret + `</ul>
+			</details>
+		</html>`
 }
 
 func renderCommit(commit *object.Commit) (string, error) {

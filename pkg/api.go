@@ -1,4 +1,4 @@
-package main
+package self_forge
 
 import (
 	"fmt"

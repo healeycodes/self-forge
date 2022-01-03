@@ -1,4 +1,4 @@
-package main
+package self_forge
 
 import (
 	"fmt"
@@ -14,13 +14,15 @@ import (
 	"github.com/gorilla/mux"
 )
 
-const updateFrequencySec = 3600
-const repoPath = "./repositories/"
-
-var repoMutexes map[string]*sync.Mutex
+var (
+	updateFrequency time.Duration = 3600
+	repoPath        string        = "./repositories/"
+	repoMutexes     map[string]*sync.Mutex
+)
 
 func main() {
 	repoMutexes = make(map[string]*sync.Mutex)
+
 	if err := os.Mkdir(repoPath, 0755); err != nil && !os.IsExist(err) {
 		log.Fatal(err)
 	}
@@ -30,7 +32,7 @@ func main() {
 		log.Printf("error: %s\n", err)
 	}
 
-	ticker := time.NewTicker(updateFrequencySec * time.Second)
+	ticker := time.NewTicker(updateFrequency * time.Second)
 	go func() {
 		for {
 			<-ticker.C
