@@ -29,7 +29,7 @@ func TestAPI(t *testing.T) {
 
 	cmd := exec.Command("/bin/sh", seedScript)
 	stdout, err := cmd.Output()
-	fmt.Println(stdout)
+	fmt.Println(string(stdout))
 
 	if err != nil {
 		t.Error(err)
@@ -73,5 +73,4 @@ func assertEqual(t *testing.T, a interface{}, b interface{}) {
 	if a != b {
 		t.Fatalf("%s != %s", a, b)
 	}
-
 }
