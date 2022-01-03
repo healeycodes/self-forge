@@ -27,7 +27,7 @@ func TestMain(m *testing.M) {
 
 func TestAPI(t *testing.T) {
 
-	cmd := exec.Command("/bin/sh", seedScript)
+	cmd := exec.Command("/bin/bash", seedScript)
 	stdout, err := cmd.Output()
 	fmt.Println(string(stdout))
 
