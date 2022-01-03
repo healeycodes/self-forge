@@ -22,7 +22,9 @@ func TestMain(m *testing.M) {
 	os.RemoveAll(repositoryPath)
 	os.MkdirAll(repositoryPath, 0777)
 
-	seedScript := `cd repositories
+	seedScript := `rm -r repositories
+mkdir repositories
+cd repositories
 mkdir a_repository
 cd a_repository
 git init
@@ -36,7 +38,7 @@ git add .
 git commit -m "Add v"`
 
 	parts := strings.Split(seedScript, "\n")
-	cmd := exec.Command("sudo", "/bin/sh", "-c", strings.Join(parts, ";"))
+	cmd := exec.Command("/bin/sh", "-c", strings.Join(parts, ";"))
 	stdout, err := cmd.Output()
 	fmt.Println(string(stdout))
 	if err != nil {
