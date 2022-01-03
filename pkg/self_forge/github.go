@@ -22,6 +22,11 @@ func getGitHubInfo() (gitHubRepos, error) {
 		limitRepos = "5"
 	}
 
+	// This can be useful for dev (e.g. spam restart server without hitting GitHub)
+	if limitRepos == "0" {
+		return gitHubRepos{}, nil
+	}
+
 	url := "https://api.github.com/users/" + username + "/repos?per_page=" + limitRepos
 	resp, err := http.Get(url)
 	if err != nil {
@@ -46,16 +51,17 @@ func getGitHubInfo() (gitHubRepos, error) {
 	return repos, nil
 }
 
-func cloneRepo(repoName string, gitUrl string) error {
-	_, err := git.PlainClone(repoPath+repoName, false, &git.CloneOptions{
+func cloneRepo(repoName string, gitUrl string) (*git.Repository, error) {
+	log.Printf("cloning: %s\n", gitUrl)
+	r, err := git.PlainClone(repoPath+repoName, false, &git.CloneOptions{
 		URL:      gitUrl,
 		Progress: log.Writer(),
 	})
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	return nil
+	return r, nil
 }
 
 func updateRepos() error {
@@ -76,40 +82,38 @@ func updateRepos() error {
 		err = func() error {
 			defer unlockRepo(repo.Name)
 
+			var r *git.Repository
+			var err error
 			if _, ok := directories[repo.Name]; !ok {
-				log.Printf("cloning: %s\n", repo.GitUrl)
-				err := cloneRepo(repo.Name, repo.GitUrl)
+				r, err = cloneRepo(repo.Name, repo.GitUrl)
 				if err != nil {
 					return err
 				}
 			} else {
 				localGitPath := path.Join(repoPath, repo.Name)
-				log.Printf("opening: %s\n", localGitPath)
-				r, err := git.PlainOpen(localGitPath)
+				r, err = git.PlainOpen(localGitPath)
 				if err != nil {
 					return err
 				}
+			}
 
-				log.Printf("fetching: %s\n", localGitPath)
-				err = r.Fetch(&git.FetchOptions{Force: true})
-				if err != nil {
-					if err != git.NoErrAlreadyUpToDate {
-						return err
-					}
-				}
-
-				log.Printf("getting worktree: %s\n", localGitPath)
-				w, err := r.Worktree()
-				if err != nil {
+			err = r.Fetch(&git.FetchOptions{Force: true})
+			if err != nil {
+				if err != git.NoErrAlreadyUpToDate {
 					return err
 				}
+			}
 
-				log.Printf("pulling: %s\n", localGitPath)
-				err = w.Pull(&git.PullOptions{Force: true})
-				if err != nil {
-					if err != git.NoErrAlreadyUpToDate {
-						return err
-					}
+			w, err := r.Worktree()
+			if err != nil {
+				return err
+			}
+
+			log.Printf("pulling: %s\n", repo.Name)
+			err = w.Pull(&git.PullOptions{Force: true})
+			if err != nil {
+				if err != git.NoErrAlreadyUpToDate {
+					return err
 				}
 			}
 

@@ -69,7 +69,7 @@ func GetContext(repoName string, extra string) ([]string, []gitFile, []gitCommit
 	}
 
 	// Branches
-	branchList := make([]string, 0)
+	branchSet := make(map[string]bool, 0)
 	r, err := git.PlainOpen(localGitPath)
 	if err != nil {
 		return nil, nil, nil, err
@@ -79,12 +79,17 @@ func GetContext(repoName string, extra string) ([]string, []gitFile, []gitCommit
 	refIter.ForEach(func(ref *plumbing.Reference) error {
 		if ref.Name().IsRemote() {
 			branchShort := strings.Replace(ref.Name().Short(), "origin/", "", 1)
-			branchList = append(branchList, branchShort)
+			branchSet[branchShort] = true
 		} else if ref.Name().IsBranch() {
-			branchList = append(branchList, ref.Name().Short())
+			branchSet[ref.Name().Short()] = true
 		}
 		return nil
 	})
+
+	branchList := make([]string, 0)
+	for branchShort := range branchSet {
+		branchList = append(branchList, branchShort)
+	}
 
 	// Commits
 	commitList := make([]gitCommit, 0)
