@@ -59,7 +59,7 @@ func serve() {
 
 	srv := &http.Server{
 		Handler: router,
-		Addr:    fmt.Sprintf("0.0.0.0:%s", port),
+		Addr:    fmt.Sprintf(":%s", port),
 	}
 	log.Fatal(srv.ListenAndServe())
 }
