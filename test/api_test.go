@@ -1,7 +1,11 @@
 package main
 
 import (
+	"fmt"
+	"os"
+	"os/exec"
 	"sort"
+	"strings"
 	"testing"
 
 	"github.com/healeycodes/self-forge/pkg/self_forge"
@@ -13,6 +17,36 @@ var (
 	branchOne      = "one"
 	branchTwo      = "two"
 )
+
+func TestMain(m *testing.M) {
+	os.RemoveAll(repositoryPath)
+	os.MkdirAll(repositoryPath, 0777)
+
+	seedScript := `cd repositories
+mkdir a_repository
+cd a_repository
+git init
+git checkout -b one
+echo "a" > a.txt 
+git add .
+git commit -m "Add a"
+git checkout -b two
+echo "b" > b.txt 
+git add .
+git commit -m "Add v"`
+
+	parts := strings.Split(seedScript, "\n")
+	cmd := exec.Command("sudo /bin/sh", "-c", strings.Join(parts, ";"))
+	stdout, err := cmd.Output()
+	fmt.Println(string(stdout))
+	if err != nil {
+		fmt.Println(err.Error())
+		panic(err)
+	}
+
+	code := m.Run()
+	os.Exit(code)
+}
 
 func TestAPI(t *testing.T) {
 	repositories, err := self_forge.GetAllLocalRepos()
