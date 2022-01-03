@@ -20,7 +20,7 @@ var (
 	repoMutexes     map[string]*sync.Mutex
 )
 
-func start() {
+func Start() {
 	repoMutexes = make(map[string]*sync.Mutex)
 
 	if err := os.Mkdir(repoPath, 0755); err != nil && !os.IsExist(err) {
@@ -71,7 +71,7 @@ func handleError(w http.ResponseWriter, err error) {
 }
 
 func handleHome(w http.ResponseWriter, r *http.Request) {
-	directories, err := getAllLocalRepos()
+	directories, err := GetAllLocalRepos()
 	if err != nil {
 		handleError(w, err)
 		return
@@ -96,14 +96,14 @@ func handleRepository(w http.ResponseWriter, r *http.Request) {
 	lockRepo(repository)
 	defer unlockRepo(repository)
 
-	branchShort, err := checkoutBranch(repository, branch)
+	branchShort, err := CheckoutBranch(repository, branch)
 	if err != nil {
 		handleError(w, err)
 		return
 	}
 
 	if strings.HasSuffix(filePath, "/") || filePath == "" {
-		branchList, fileList, commitList, err := getContext(repository, filePath)
+		branchList, fileList, commitList, err := GetContext(repository, filePath)
 		if err != nil {
 			handleError(w, err)
 			return

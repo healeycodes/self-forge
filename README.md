@@ -9,5 +9,5 @@ Self-host your GitHub repositories and serve them with a lightweight user interf
 - `GITHUB_USERNAME` use this account's public repositories
 
 ```bash
-PORT="80" LIMIT_REPOS=5 GITHUB_USERNAME="healeycodes" go run .
+PORT="80" LIMIT_REPOS=5 GITHUB_USERNAME="healeycodes" go run ./cmd
 ```

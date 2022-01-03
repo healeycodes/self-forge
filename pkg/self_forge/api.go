@@ -32,7 +32,7 @@ func unlockRepo(repo string) {
 }
 
 // Get all local repositories by name
-func getAllLocalRepos() (map[string]bool, error) {
+func GetAllLocalRepos() (map[string]bool, error) {
 	files, err := os.ReadDir(repoPath)
 	if err != nil {
 		return nil, err
@@ -47,7 +47,7 @@ func getAllLocalRepos() (map[string]bool, error) {
 }
 
 // Get branches, files, and commits, for a repository and optional extra path
-func getContext(repoName string, extra string) ([]string, []gitFile, []gitCommit, error) {
+func GetContext(repoName string, extra string) ([]string, []gitFile, []gitCommit, error) {
 	localGitPath := path.Join(repoPath, repoName)
 	target := path.Join(localGitPath, extra)
 
@@ -80,6 +80,8 @@ func getContext(repoName string, extra string) ([]string, []gitFile, []gitCommit
 		if ref.Name().IsRemote() {
 			branchShort := strings.Replace(ref.Name().Short(), "origin/", "", 1)
 			branchList = append(branchList, branchShort)
+		} else if ref.Name().IsBranch() {
+			branchList = append(branchList, ref.Name().Short())
 		}
 		return nil
 	})
@@ -134,10 +136,8 @@ func getBranchRefFromShort(repoName string, branchShort string) (plumbing.Hash, 
 
 	refIter, _ := r.References()
 	refIter.ForEach(func(ref *plumbing.Reference) error {
-		if ref.Name().IsRemote() {
-			if branchShort == strings.Replace(ref.Name().Short(), "origin/", "", 1) {
-				refHash = ref.Hash()
-			}
+		if ref.Name().Short() == branchShort {
+			refHash = ref.Hash()
 		}
 		return nil
 	})
@@ -151,7 +151,7 @@ func getBranchRefFromShort(repoName string, branchShort string) (plumbing.Hash, 
 
 // Checkout a branch (empty `branchShort` uses default branch)
 // and return the branch short name
-func checkoutBranch(repoName string, branchShort string) (string, error) {
+func CheckoutBranch(repoName string, branchShort string) (string, error) {
 	localGitPath := path.Join(repoPath, repoName)
 	r, err := git.PlainOpen(localGitPath)
 	if err != nil {

@@ -65,7 +65,7 @@ func updateRepos() error {
 		return err
 	}
 
-	directories, err := getAllLocalRepos()
+	directories, err := GetAllLocalRepos()
 	if err != nil {
 		return err
 	}
