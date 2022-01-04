@@ -49,7 +49,7 @@ func Start() {
 func serve() {
 	port, found := os.LookupEnv("PORT")
 	if !found {
-		log.Fatal("PORT not set")
+		port = "80"
 	}
 
 	router := mux.NewRouter()

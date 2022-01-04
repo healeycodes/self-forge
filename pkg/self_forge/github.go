@@ -2,6 +2,7 @@ package self_forge
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -17,17 +18,12 @@ func getGitHubInfo() (gitHubRepos, error) {
 		log.Fatal("GITHUB_USERNAME not set")
 	}
 
-	limitRepos, found := os.LookupEnv("LIMIT_REPOS")
-	if !found {
-		limitRepos = "5"
-	}
-
-	// This can be useful for dev (e.g. spam restart server without hitting GitHub)
-	if limitRepos == "0" {
+	_, found = os.LookupEnv("DEV")
+	if found {
 		return gitHubRepos{}, nil
 	}
 
-	url := "https://api.github.com/users/" + username + "/repos?per_page=" + limitRepos
+	url := fmt.Sprintf("https://api.github.com/users/%s/repos?per_page=100", username)
 	resp, err := http.Get(url)
 	if err != nil {
 		return nil, err

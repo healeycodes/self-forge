@@ -4,20 +4,22 @@ _(Under construction)_
 
 Self-host your GitHub repositories and serve them with a lightweight user interface (no JS or CSS).
 
+![Repository page – branches, commits, and files](preview.png)
+
 ## TODO
 
-- Add server-rendered method to highlight lines of code.
-- Add pagination to the GitHub API call to get all public repositories (either via library or manually). This reduces the limit from 100 to all.
-- Add e2e tests (currently there's some integration tests).
+- Server-rendered method to highlight lines of code.
+- Add pagination to the GitHub API to get all public repositories.
+- Run (and proxy) a git server to allow `git clone` from this mirror.
+- e2e tests (currently there's some integration tests).
 
 ## Run
 
-- `PORT` serve from 0.0.0.0:PORT
-- `LIMIT_REPOS` pull a limited amount of repositories
-- `GITHUB_USERNAME` use this account's public repositories
+- `PORT` serve from 0.0.0.0:{PORT}
+- `GITHUB_USERNAME` clone/fetch/pull/host this account's public repositories
 
 ```bash
-PORT="80" LIMIT_REPOS=5 GITHUB_USERNAME="healeycodes" go run ./cmd
+PORT="80" GITHUB_USERNAME="healeycodes" go run ./cmd
 ```
 
 ## Test
