@@ -15,7 +15,7 @@ Self-host your GitHub repositories and serve them with a lightweight user interf
 
 ## Run
 
-- `PORT` serve from 0.0.0.0:{PORT}
+- `PORT` serve from `:{PORT}`
 - `GITHUB_USERNAME` clone/fetch/pull/host this account's public repositories
 
 ```bash
